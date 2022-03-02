@@ -1,30 +1,39 @@
 import os
-import typing
 import strawberry
 
-#from git import Repo
+
+from typing import List, Optional
+from git import Repo
 from schemas import Author, Branch,  Commit, PullRequest
 
-#print(os.getcwd())
-#repo = Repo()
+
+#repo = Repo(os.getcwd(), search_parent_directories=True)
+#print(repo.git.branch('-r'))
+#print('comence')
 #assert not repo.bare
 
 @strawberry.type
 class Query:
     @strawberry.field
-    def authors(self) -> typing.List[Author]:
+    def authors(self) -> Optional[List[Author]]:
         pass
     
     @strawberry.field
-    def branches(self) -> typing.List[Branch]:
+    def branches(self) -> Optional[List[Branch]]:
+        #branch_list = []
+        #print(repo.git.branch('-r').split('\n'))
+        #for branch_name in repo.git.branch('-r').split('\n'):
+        #    print(branch_name)
+        #    list.append(Branch(branch_name))
+        #return branch_list
         pass
     
     @strawberry.field
-    def commits(self) -> typing.List[Commit]:
+    def commits(self, branch_name: str) -> Optional[List[Commit]]:
         pass
 
     @strawberry.field
-    def pull_request(self) -> typing.List[PullRequest]:
+    def pull_request(self) -> Optional[List[PullRequest]]:
         pass
 
 
