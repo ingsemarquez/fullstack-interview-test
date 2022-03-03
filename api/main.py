@@ -1,23 +1,34 @@
-from ast import If
 import os
-#import strawberry
 
-from fastapi import FastAPI
-#from strawberry.fastapi import GraphQLRouter
-#from operations import Query
+from fastapi import Depends, FastAPI
+from sqlalchemy.orm import Session
 from git import Repo
 from typing import List, Optional
 from schemas import Author, Branch, Commit, PullRequest
+from models import Base, engine, db_session, PullRequestModel
+from curd_utils import PullRequestCrud
 
-# experiment with graphql
+# experiment with graphql using strawberry
 #schema = strawberry.Schema(Query)
 #graphql_app = GraphQLRouter(schema)
 
+Base.metadata.create_all(engine)
+
 app = FastAPI()
+
+# Dependency
+def get_db():
+    db = db_session()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # old fashion way to do
 repo = Repo(os.getcwd(), search_parent_directories=True)
 assert not repo.bare
+
+crud = PullRequestCrud()
 
 @app.get('/branches')
 async def get_branches() -> Optional[List[Branch]]:
@@ -52,11 +63,19 @@ async def get_commit_detail(sha: str) -> Optional[Commit]:
         return None
 
 @app.get('/pull_request')
-async def get_pull_request() -> Optional[List[str]]:
-    prs = []
-    for branch_name in repo.heads:
-        prs.append(branch_name.name)
-    return prs
+async def get_pull_request(db: Session = Depends(get_db)) -> Optional[List[PullRequest]]:
+    pull_requests = []
+    try:
+        pull_requests = crud.get(db)
+    except:
+        print('unhandled db failure')
+
+    return pull_requests
 
 
-#app.include_router(graphql_app, prefix='/graphql')
+@app.post('/pull_request')
+async def add_pull_request(pull_request: PullRequest, db: Session = Depends(get_db)) -> Optional[PullRequest]:
+    try:
+        return crud.add(db=db, pr=pull_request)
+    except:
+        print('unhandled creation failure')
