@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  api:
+    image: fullstack_test_api
+    build: ./api/
+    ports: 80:8000

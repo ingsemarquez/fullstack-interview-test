@@ -1,0 +1,9 @@
+__pycache__
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.sqlite
